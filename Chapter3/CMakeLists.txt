@@ -1,23 +1,24 @@
 cmake_minimum_required(VERSION 3.25)
 
-set(LIBRARY_NAME LineSearch)
+set(PART_NAME Chapter3)
 
-add_library(${LIBRARY_NAME} STATIC LineSearch.cpp)
+add_executable(${PART_NAME} main.cpp)
 
 # includeパスに追加
-target_include_directories(${LIBRARY_NAME} PRIVATE
+target_include_directories(${PART_NAME} PRIVATE
     ${PROJECT_SOURCE_DIR}/include
 # external library
     ${EIGEN3_INCLUDE_DIR}
 )
 
 # ライブラリにリンク
-target_link_libraries(${LIBRARY_NAME} PRIVATE
+target_link_libraries(${PART_NAME} PRIVATE
 # lib
+    NewtonMethod
 
 # external library
     Eigen3::Eigen
 )
 
 # コンパイラ関連
-target_compile_options(${LIBRARY_NAME} PUBLIC -O3 -march=native)
+target_compile_options(${PART_NAME} PUBLIC -O3 -march=native)
