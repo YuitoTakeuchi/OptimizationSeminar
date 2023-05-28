@@ -129,3 +129,43 @@ public:
         optimal_function_value = objective_func(x);
     };
 };
+
+template<class LineSearchAlgorithm>
+class BFGS: public SearchDirection {
+private:
+    Eigen::MatrixXd H;
+
+public:
+    BFGS(double (*objective_func)(const Eigen::VectorXd&), Eigen::VectorXd (*gradient_func)(const Eigen::VectorXd&))
+    : SearchDirection(objective_func, gradient_func) {
+
+    }
+
+    void solve(Eigen::VectorXd x, double tolerance=1e-9) {
+        const int N = x.rows();
+        bool reset = false;
+        int cnt = 0;
+        Eigen::VectorXd s, y;
+        Eigen::VectorXd grad = Eigen::VectorXd::Zero(N);
+        while(1) {
+            y = grad;
+            grad = gradient_func(x);
+            y = grad - y;
+            if(grad.maxCoeff() < tolerance && -grad.minCoeff() < tolerance) break; // converged.
+            if(cnt == 0 || reset) {
+                H = Eigen::MatrixXd::Identity(N, N) * grad.norm();
+            } else {
+                double sigma = 1.0 / s.dot(y);
+                H = (Eigen::MatrixXd::Identity(N, N) - sigma * s * y.transpose()) * H * (Eigen::MatrixXd::Identity(N, N) - sigma * y * s.transpose()) + sigma * s * s.transpose();
+            }
+            Eigen::VectorXd search_direction = -H * grad;
+            double grad_phi0 = grad.dot(search_direction);
+            LineSearchAlgorithm ls(objective_func, gradient_func, objective_func(x), grad_phi0, x, search_direction);
+            s = ls.find_step() * search_direction;
+            x += s;
+            ++cnt;
+        }
+        optimal_point = x;
+        optimal_function_value = objective_func(x);
+    }
+};
