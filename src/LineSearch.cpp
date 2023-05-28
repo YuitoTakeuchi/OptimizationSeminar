@@ -5,7 +5,27 @@ LineSearch::LineSearch(double (*objective_func)(const Eigen::VectorXd&), Eigen::
 : objective_func(objective_func), gradient_func(gradient_func), phi0(current), g_phi0(grad),
     x_start(x_start), direction(direction), alpha_init(alpha_init) {}
 
-double LineSearch::find_alpha_p(double alpha_low, double alpha_high, double phi_low, double phi_high, int order) {
+Armijo::Armijo(double (*objective_func)(const Eigen::VectorXd&), Eigen::VectorXd (*gradient_func)(const Eigen::VectorXd&),
+    double current, double grad, Eigen::VectorXd x_start, Eigen::VectorXd direction, double alpha_init)
+: LineSearch(objective_func, gradient_func, current, grad, x_start, direction, alpha_init) {
+
+}
+
+double Armijo::find_step(double mu, double rho) {
+    double alpha = alpha_init;
+    while(objective_func(x_start + alpha * direction) > objective_func(x_start) + mu * alpha * g_phi0) {
+        alpha = rho * alpha;
+    }
+    return alpha;
+};
+
+Wolf::Wolf(double (*objective_func)(const Eigen::VectorXd&), Eigen::VectorXd (*gradient_func)(const Eigen::VectorXd&),
+    double current, double grad, Eigen::VectorXd x_start, Eigen::VectorXd direction, double alpha_init)
+: LineSearch(objective_func, gradient_func, current, grad, x_start, direction, alpha_init) {
+
+}
+
+double Wolf::find_alpha_p(double alpha_low, double alpha_high, double phi_low, double phi_high, int order) {
     double g_phi_low  = gradient_func(x_start + alpha_low  * direction).dot(direction);
     double g_phi_high = gradient_func(x_start + alpha_high * direction).dot(direction);
 
@@ -27,7 +47,7 @@ double LineSearch::find_alpha_p(double alpha_low, double alpha_high, double phi_
     return alpha;
 };
 
-double LineSearch::pinpoint(double alpha_low, double alpha_high, double phi_low, double phi_high, double mu1, double mu2) {
+double Wolf::pinpoint(double alpha_low, double alpha_high, double phi_low, double phi_high, double mu1, double mu2) {
     int k = 0;
     double alpha; // return value
     while(1) {
@@ -51,15 +71,7 @@ double LineSearch::pinpoint(double alpha_low, double alpha_high, double phi_low,
     return alpha;
 };
 
-double LineSearch::armijo(double mu, double rho) {
-    double alpha = alpha_init;
-    while(objective_func(x_start + alpha * direction) > objective_func(x_start) + mu * alpha * g_phi0) {
-        alpha = rho * alpha;
-    }
-    return alpha;
-};
-
-double LineSearch::wolf(double mu1, double mu2, double sigma) {
+double Wolf::find_step(double mu1, double mu2, double sigma) {
     double alpha1 = 0.0, alpha2 = alpha_init;
     double phi1 = phi0, g_phi1 = g_phi0;
 
@@ -86,12 +98,3 @@ double LineSearch::wolf(double mu1, double mu2, double sigma) {
 
     return alpha;
 };
-
-double LineSearch::find_step(std::string method) {
-    if(method == "armijo") return armijo();
-    else if(method == "wolf") return wolf();
-    else {
-        std::cerr << "Only \"armijo\" or \"wolf\" is supported for line search algorithm\n";
-        return 0.0;
-    }
-}
