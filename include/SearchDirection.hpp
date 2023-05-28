@@ -26,7 +26,6 @@ template<class LineSearchAlgorithm>
 class GradientDescent: public SearchDirection {
 private:
 
-
 public:
     GradientDescent(double (*objective_func)(const Eigen::VectorXd&), Eigen::VectorXd (*gradient_func)(const Eigen::VectorXd&))
     : SearchDirection(objective_func, gradient_func) {
@@ -57,7 +56,6 @@ template<class LineSearchAlgorithm>
 class ConjugateGradient: public SearchDirection {
 private:
 
-
 public:
     ConjugateGradient(double (*objective_func)(const Eigen::VectorXd&), Eigen::VectorXd (*gradient_func)(const Eigen::VectorXd&))
     : SearchDirection(objective_func, gradient_func) {
@@ -68,7 +66,6 @@ public:
         Eigen::VectorXd grad, search_direction;
         search_direction = Eigen::VectorXd::Zero(N);
         grad = Eigen::VectorXd::Ones(N);
-        double alpha = 1.0;
         int cnt = 0;
         bool reset = false;
 
@@ -92,12 +89,41 @@ public:
             }
 
             search_direction = - grad / sqrt(grad_squared_norm) + beta * search_direction;
-            double grad_phi0 = gradient_func(x).dot(search_direction);
+            double grad_phi0 = grad.dot(search_direction);
 
-            LineSearchAlgorithm ls(objective_func, gradient_func, objective_func(x), grad_phi0, x, search_direction, alpha);
+            LineSearchAlgorithm ls(objective_func, gradient_func, objective_func(x), grad_phi0, x, search_direction);
 
             x += ls.find_step() * search_direction;
             ++cnt;
+        }
+        optimal_point = x;
+        optimal_function_value = objective_func(x);
+    };
+};
+
+template<class LineSearchAlgorithm, class LinearSolver = Eigen::FullPivLU<Eigen::MatrixXd>>
+class NewtonsMethod: public SearchDirection {
+private:
+    Eigen::MatrixXd (*hessian_func)(const Eigen::VectorXd&);
+public:
+    NewtonsMethod(double (*objective_func)(const Eigen::VectorXd&), Eigen::VectorXd (*gradient_func)(const Eigen::VectorXd&), Eigen::MatrixXd (*hessian_func)(const Eigen::VectorXd&))
+    : SearchDirection(objective_func, gradient_func), hessian_func(hessian_func) {
+
+    }
+    void solve(Eigen::VectorXd x, double tolerance=1e-9) {
+        const int N = x.rows();
+        Eigen::VectorXd grad = Eigen::VectorXd::Ones(N);
+        Eigen::MatrixXd hessian = Eigen::MatrixXd::Zero(N, N);
+        double alpha = 1.0;
+        int cnt = 0;
+        while(grad.maxCoeff() > tolerance || -grad.minCoeff() > tolerance) {
+            grad = gradient_func(x);
+            hessian = hessian_func(x);
+            LinearSolver sol(hessian);
+            Eigen::VectorXd search_direction = -sol.solve(grad);
+            double grad_phi0 = grad.dot(search_direction);
+            LineSearchAlgorithm ls(objective_func, gradient_func, objective_func(x), grad_phi0, x, search_direction);
+            x += ls.find_step() * search_direction;
         }
         optimal_point = x;
         optimal_function_value = objective_func(x);
