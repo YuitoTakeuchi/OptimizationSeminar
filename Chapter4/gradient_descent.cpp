@@ -17,7 +17,7 @@ Eigen::VectorXd calc_grad(const Eigen::VectorXd& point) {
 }
 
 int main() {
-    GradientDescent<Armijo> gd(&func, &calc_grad);
+    ConjugateGradient<Armijo> gd(&func, &calc_grad);
     Eigen::VectorXd x = Eigen::VectorXd::Zero(2);
     x << -1, 1;
     gd.solve(x, 1e-6);
