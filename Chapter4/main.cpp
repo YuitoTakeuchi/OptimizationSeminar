@@ -29,7 +29,7 @@ void line_search(Eigen::VectorXd& point, double tolerance = 1e-9) {
     Eigen::VectorXd grad = Eigen::VectorXd::Ones(point.rows());
     while(grad.maxCoeff() > tolerance || -grad.minCoeff() > tolerance) {
         Eigen::VectorXd search_direction = gradient_descent(point);
-        LineSearch ls(&func, &calc_grad, func(point), calc_grad(point).dot(search_direction), point, search_direction);
+        Armijo ls(&func, &calc_grad, func(point), calc_grad(point).dot(search_direction), point, search_direction);
         point += ls.find_step() * search_direction;
         grad = calc_grad(point);
     }
