@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.25)
 
 set(PART_NAME Chapter4)
 
-add_executable(${PART_NAME} main.cpp)
+add_executable(${PART_NAME} line_search.cpp)
 
 # includeパスに追加
 target_include_directories(${PART_NAME} PRIVATE
