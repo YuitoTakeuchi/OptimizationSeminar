@@ -4,6 +4,8 @@ include(FetchContent)
 set(PROJECT_NAME Optimization)
 project (${PROJECT_NAME})
 
+set(CMAKE_CXX_STANDARD 17)
+
 # eigen
 find_package(Eigen3 REQUIRED)
 

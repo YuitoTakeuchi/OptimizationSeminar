@@ -73,22 +73,24 @@ double Wolf::pinpoint(double alpha_low, double alpha_high, double phi_low, doubl
 
 double Wolf::find_step(double mu1, double mu2, double sigma) {
     double alpha1 = 0.0, alpha2 = alpha_init;
-    double phi1 = phi0, g_phi1 = g_phi0;
+    double phi1 = phi0, g_phi1 = g_phi0, phi2;
 
     int cnt = 0;
     double alpha; // return value
     while(true) {
-        double phi2 = objective_func(x_start + alpha2 * direction);
-        if(phi2>phi0 + mu1*alpha2*g_phi0 || (cnt > 0 && phi2 > phi1)) {
+        phi1 = objective_func(x_start + alpha1 * direction);
+        phi2 = objective_func(x_start + alpha2 * direction);
+        if(phi2>phi0+mu1*alpha2*g_phi0 || (cnt > 0 && phi2 > phi1)) {
             alpha = pinpoint(alpha1, alpha2, phi1, phi2, mu1, mu2);
             break;
         }
         double g_phi2 = gradient_func(x_start + alpha2 * direction).dot(direction);
-        if(std::abs(g_phi2) <= -mu1 * g_phi0) {
+        if(std::abs(g_phi2) <= -mu2 * g_phi0) {
             alpha = alpha2;
             break;
         } else if(g_phi2 >= 0) {
             alpha = pinpoint(alpha2, alpha1, phi2, phi1, mu1, mu2);
+            break;
         } else {
             alpha1 = alpha2;
             alpha2 = sigma * alpha2;
