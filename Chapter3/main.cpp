@@ -4,27 +4,27 @@
 #include "NewtonMethod.hpp"
 
 // example 3.7
-Eigen::VectorXd example3_7(Eigen::VectorXd p) {
+Eigen::VectorXd example3_7(const Eigen::VectorXd& p) {
     Eigen::VectorXd ret = Eigen::VectorXd::Zero(p.rows());
     ret(0) = 2.0*p(0)*p(0)*p(0)+4.0*p(0)*p(0)+p(0)-2.0;
     return ret;
 }
 
-Eigen::MatrixXd example3_7_jacob(Eigen::VectorXd p) {
+Eigen::MatrixXd example3_7_jacob(const Eigen::VectorXd& p) {
     Eigen::MatrixXd ret = Eigen::MatrixXd::Zero(p.rows(), p.rows());
     ret(0, 0) = 6.0 * p(0) * p(0) + 8.0 * p(0) + 1.0;
     return ret;
 }
 
 // example 3.8
-Eigen::VectorXd example3_8(Eigen::VectorXd p) {
+Eigen::VectorXd example3_8(const Eigen::VectorXd& p) {
     Eigen::VectorXd ret = Eigen::VectorXd::Zero(p.rows());
     ret(0) = p(1) - 1.0/p(0);
     ret(1) = p(1) - sqrt(p(0));
     return ret;
 }
 
-Eigen::MatrixXd example3_8_jacob(Eigen::VectorXd p) {
+Eigen::MatrixXd example3_8_jacob(const Eigen::VectorXd& p) {
     Eigen::MatrixXd ret = Eigen::MatrixXd::Zero(p.rows(), p.rows());
     ret(0, 0) = 1.0 / p(0) / p(0);
     ret(0, 1) = 1.0;
