@@ -45,4 +45,8 @@ int main() {
     NewtonsMethod<Armijo> newtons_method(&func, &calc_grad, &calc_hessian);
     newtons_method.solve(x, 1e-6);
     newtons_method.output_to_file(std::string(p.parent_path()) + "/result/newtons_method.txt");
+
+    BFGS<Armijo> BFGS(&func, &calc_grad);
+    BFGS.solve(x, 1e-6);
+    BFGS.output_to_file(std::string(p.parent_path()) + "/result/BFGS.txt");
 }

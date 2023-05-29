@@ -57,6 +57,19 @@ with open(folder_path + "/newtons_method.txt") as f:
         ys.append(data[1])
 ax.plot(xs, ys, label="Newton's Method", color="r")
 
+
+# BFGS Method
+xs = []
+ys = []
+with open(folder_path + "/BFGS.txt") as f:
+    while(1):
+        data = list(map(float, f.readline().split()))
+        if len(data) < 3:
+            break
+        xs.append(data[0])
+        ys.append(data[1])
+ax.plot(xs, ys, label="BFGS", color="navy")
+
 ax.legend(loc='upper left', bbox_to_anchor=(1, 1))
 plt.show()
         

@@ -224,16 +224,20 @@ private:
 public:
     BFGS(double (*objective_func)(const Eigen::VectorXd&), Eigen::VectorXd (*gradient_func)(const Eigen::VectorXd&))
     : SearchDirection(objective_func, gradient_func) {
-
+        optimizer = "BFGS";
     }
 
     void solve(Eigen::VectorXd x, double tolerance=1e-9) {
         const int N = x.rows();
         bool reset = false;
-        int cnt = 0;
         Eigen::VectorXd s, y;
         Eigen::VectorXd grad = Eigen::VectorXd::Zero(N);
         while(1) {
+            double obj_val = objective_func(x);
+            if(store_points) {
+                point_history.push_back(x);
+                obj_history.push_back(obj_val);
+            }
             y = grad;
             grad = gradient_func(x);
             y = grad - y;
@@ -246,12 +250,13 @@ public:
             }
             Eigen::VectorXd search_direction = -H * grad;
             double grad_phi0 = grad.dot(search_direction);
-            LineSearchAlgorithm ls(objective_func, gradient_func, objective_func(x), grad_phi0, x, search_direction);
+            LineSearchAlgorithm ls(objective_func, gradient_func, obj_val, grad_phi0, x, search_direction);
             s = ls.find_step() * search_direction;
             x += s;
             ++cnt;
         }
         optimal_point = x;
         optimal_function_value = objective_func(x);
+        output_result();
     }
 };
