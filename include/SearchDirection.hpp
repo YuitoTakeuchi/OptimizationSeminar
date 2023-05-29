@@ -32,6 +32,12 @@ public:
         }
     }
 
+    void output_to_file(const std::string& path) {
+        std::ofstream ofs(path);
+        output_to_file(ofs);
+        ofs.close();
+    }
+
     void output_result() {
         std::cout << "\n\n*********************************************\n\n";
         if(cnt < 0) {

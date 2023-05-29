@@ -29,21 +29,20 @@ Eigen::MatrixXd calc_hessian(const Eigen::VectorXd& x) {
 
 
 int main() {
-    // std::filesystem::path p = __FILE__;
-    // std::ofstream ofs(std::string(p.parent_path()) + "/result/res.txt");
-    // gd.output_to_file(ofs);
-    // ofs.close();
+    std::filesystem::path p = __FILE__;
+
     Eigen::VectorXd x = Eigen::VectorXd::Zero(2);
+    x << -1, 2;
 
     GradientDescent<Armijo> gradient_descent(&func, &calc_grad);
-    x << -1, 2;
     gradient_descent.solve(x, 1e-6);
+    gradient_descent.output_to_file(std::string(p.parent_path()) + "/result/gradient_descent.txt");
     
     ConjugateGradient<Armijo> conjugate_gradient(&func, &calc_grad);
-    x << -1, 2;
     conjugate_gradient.solve(x, 1e-6);
+    conjugate_gradient.output_to_file(std::string(p.parent_path()) + "/result/conjugate_gradient.txt");
 
     NewtonsMethod<Armijo> newtons_method(&func, &calc_grad, &calc_hessian);
-    x << -1, 2;
     newtons_method.solve(x, 1e-6);
+    newtons_method.output_to_file(std::string(p.parent_path()) + "/result/newtons_method.txt");
 }
