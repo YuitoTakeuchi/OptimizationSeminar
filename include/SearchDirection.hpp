@@ -2,12 +2,68 @@
 
 #include <iostream>
 #include <Eigen/Dense>
+#include <fstream>
+#include <iomanip>
 
 // solve unconstrained optimization problem
 class SearchDirection {
+public:
+    void set_store_points(bool target) {
+        store_points = target;
+        if(target) {
+            point_history.reserve(max_iter);
+            obj_history.reserve(max_iter);
+        }
+    }
+
+    void output_to_file(std::ofstream& ofs) {
+        int N = point_history.size();
+        if(N == 0) {
+            std::cerr << "no log are stored in the optimizer\n";
+            return;
+        }
+        int Nx = point_history[0].rows();
+        ofs << std::setprecision(15);
+        for(int i = 0; i < N; ++i) {
+            for(int j = 0; j < Nx; ++j) {
+                ofs << point_history[i](j) << " ";
+            }
+            ofs << obj_history[i] << "\n";
+        }
+    }
+
+    void output_result() {
+        std::cout << "\n\n*********************************************\n\n";
+        if(cnt < 0) {
+            std::cout << "Optimization Process Did NOT Converge.\n";
+        } else {
+            std::cout << "Optimize Success!\n";
+            std::cout << "Solver: " << optimizer << "\n";
+            std::cout << "Iteration Count: " << cnt << "\n";
+            std::cout << "Minimum value: " << optimal_function_value << " ";
+            std::cout << "at (";
+            for(int i = 0; i < optimal_point.rows(); ++i) {
+                std::cout << optimal_point(i) << (i == optimal_point.rows()-1 ? "" : ", ");
+            }
+            std::cout << ")\n";
+        }
+        std::cout << "\n\n*********************************************\n\n";
+    }
+
+
+    int get_iter() {return cnt;}
+    double get_optimal_value() {return optimal_function_value;};
+    Eigen::VectorXd get_optimal_point() {return optimal_point;};
+    std::vector<Eigen::VectorXd>& get_point_history() {return point_history;}
+    std::vector<double>& get_obj_hisotry() {return obj_history;}
+
+
 protected:
     double (*objective_func)(const Eigen::VectorXd&);
     Eigen::VectorXd (*gradient_func)(const Eigen::VectorXd&);
+
+    std::string optimizer;
+    std::string line_search;
 
     Eigen::VectorXd optimal_point;
     double optimal_function_value;
@@ -20,25 +76,10 @@ protected:
 
     SearchDirection(double (*objective_func)(const Eigen::VectorXd&), Eigen::VectorXd (*gradient_func)(const Eigen::VectorXd&), int max_iter = 1000000)
     :objective_func(objective_func), gradient_func(gradient_func), max_iter(max_iter)  {
-        store_points = false;
+        store_points = true;
         cnt = 0;
     }
 
-public:
-    Eigen::VectorXd get_optimal_point() {return optimal_point;};
-    double get_optimal_value() {return optimal_function_value;};
-    std::vector<Eigen::VectorXd>& get_point_history() {return point_history;}
-    std::vector<double>& get_obj_hisotry() {return obj_history;}
-
-    void set_store_points(bool target) {
-        store_points = target;
-        if(target) {
-            point_history.resize(max_iter);
-            obj_history.resize(max_iter);
-        }
-    }
-
-    int get_iter() {return cnt;}
 };
 
 template<class LineSearchAlgorithm>
@@ -48,7 +89,7 @@ private:
 public:
     GradientDescent(double (*objective_func)(const Eigen::VectorXd&), Eigen::VectorXd (*gradient_func)(const Eigen::VectorXd&), int max_iter = 1000000)
     : SearchDirection(objective_func, gradient_func, max_iter) {
-
+        optimizer = "Gradient Descent";
     }
     void solve(Eigen::VectorXd x, double tolerance=1e-9) {
         Eigen::VectorXd grad = gradient_func(x);
@@ -56,8 +97,8 @@ public:
         while(grad.maxCoeff() > tolerance || -grad.minCoeff() > tolerance && cnt < max_iter) {
             double obj_val = objective_func(x);
             if(store_points) {
-                point_history[cnt] = x;
-                obj_history[cnt] = obj_val;
+                point_history.push_back(x);
+                obj_history.push_back(obj_val);
             }
             if(cnt > 0) grad = gradient_func(x);
             double grad_norm = grad.norm();
@@ -73,6 +114,7 @@ public:
         if(cnt == max_iter) cnt = -1;
         optimal_point = x;
         optimal_function_value = objective_func(x);
+        output_result();
     };
 };
 
@@ -83,7 +125,7 @@ private:
 public:
     ConjugateGradient(double (*objective_func)(const Eigen::VectorXd&), Eigen::VectorXd (*gradient_func)(const Eigen::VectorXd&), int max_iter = 1000000)
     : SearchDirection(objective_func, gradient_func, max_iter) {
-
+        optimizer = "Conjugate Gradient";
     }
     void solve(Eigen::VectorXd x, double tolerance=1e-9) {
         const int N = x.rows();
@@ -97,8 +139,8 @@ public:
         while(grad.maxCoeff() > tolerance || -grad.minCoeff() > tolerance && cnt < max_iter) {
             double obj_val = objective_func(x);
             if(store_points) {
-                point_history[cnt] = x;
-                obj_history[cnt] = obj_val;
+                point_history.push_back(x);
+                obj_history.push_back(obj_val);
             }
             grad = gradient_func(x);
 
@@ -127,6 +169,7 @@ public:
         if(cnt == max_iter) cnt = -1;
         optimal_point = x;
         optimal_function_value = objective_func(x);
+        output_result();
     };
 };
 
@@ -137,6 +180,7 @@ private:
 public:
     NewtonsMethod(double (*objective_func)(const Eigen::VectorXd&), Eigen::VectorXd (*gradient_func)(const Eigen::VectorXd&), Eigen::MatrixXd (*hessian_func)(const Eigen::VectorXd&), int max_iter = 1000000)
     : SearchDirection(objective_func, gradient_func, max_iter), hessian_func(hessian_func) {
+        optimizer = "Newton's Method";
 
     }
     void solve(Eigen::VectorXd x, double tolerance=1e-9) {
@@ -147,8 +191,8 @@ public:
         while(grad.maxCoeff() > tolerance || -grad.minCoeff() > tolerance && cnt < max_iter) {
             double obj_val = objective_func(x);
             if(store_points) {
-                point_history[cnt] = x;
-                obj_history[cnt] = obj_val;
+                point_history.push_back(x);
+                obj_history.push_back(obj_val);
             }
             grad = gradient_func(x);
             hessian = hessian_func(x);
@@ -162,5 +206,6 @@ public:
         if(cnt == max_iter) cnt = -1;
         optimal_point = x;
         optimal_function_value = objective_func(x);
+        output_result();
     };
 };
