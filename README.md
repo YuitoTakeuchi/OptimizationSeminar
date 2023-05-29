@@ -22,8 +22,8 @@ CMake suite maintained and supported by Kitware (kitware.com/cmake).
 ## Chapter 4. Unconstrained Gradient-Based Optimization
 
 ### 直線探索ベースの手法
-信頼領域法以外の手法が該当します．直線探索手法としてはArmijo条件を使うもの，Wolf条件を使うものを実装してあります．  
-探索方向には再急降下法，共役勾配法，ニュートン法が実装してあります．  
+信頼領域法以外の手法が該当します．直線探索手法としてはArmijo条件を使うもの，Wolf条件を使うものを実装してあります．（Wolfは今のところバグっていてステップ幅が小さいと抜けられなくなります）  
+探索方向には再急降下法，共役勾配法，ニュートン法，BFGSが実装してあります．  
 共役勾配法はFletcher–Reeves formulaで実装しています．  
 
 
@@ -63,16 +63,18 @@ Eigen::MatrixXd calc_hessian(const Eigen::VectorXd& x) {
 
 3. LineSearchのアルゴリズムを指定し，最適化問題を解くインスタンスを作成する．メソッドを呼んで解く．
 ```cpp
-    ConjugateGradient<Armijo> gd(&func, &calc_grad); // 直線探索にはArmijo条件を使用する．
+    ConjugateGradient<Armijo> cg(&func, &calc_grad); // 直線探索にはArmijo条件を使用する．
     Eigen::VectorXd x = Eigen::VectorXd::Zero(2);
     x << -1, 1; // 初期点
-    gd.solve(x, 1e-6); // 初期点をx，toleranceを1e-6として問題を解く．
-    x = gd.get_optimal_point(); // 最適化後の点
-    double J = gd.get_optimal_value(); // 最適化後の目的関数の値
-    std::cout << "optimaized: (x1, x2) = (" << x(0) << ", " << x(1) << ")\n";
-    std::cout << "J = " << J << "\n";
+    cg.solve(x, 1e-6); // 初期点をx，toleranceを1e-6として問題を解く．
+    cg.output_to_file("result.txt") // reuslt.txtに過程を出力．
 ```
-
+結果の出力フォーマットは
+```
+x1 x2 x3 ... xn obective_function_value
+...
+```
+です．
 
 
 ## Reference 
