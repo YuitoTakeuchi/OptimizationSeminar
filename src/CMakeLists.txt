@@ -23,9 +23,9 @@ target_link_libraries(${LIBRARY_NAME} PRIVATE
 # コンパイラ関連
 target_compile_options(${LIBRARY_NAME} PUBLIC -O3 -march=native)
 
-set(LIBRARY_NAME NewtonMethod)
+set(LIBRARY_NAME NonlinearEquationSolver)
 
-add_library(${LIBRARY_NAME} STATIC NewtonMethod.cpp)
+add_library(${LIBRARY_NAME} STATIC NonlinearEquationSolver.cpp)
 # includeパスに追加
 target_include_directories(${LIBRARY_NAME} PRIVATE
     ${PROJECT_SOURCE_DIR}/include

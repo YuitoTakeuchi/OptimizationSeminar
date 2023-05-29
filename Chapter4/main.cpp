@@ -34,19 +34,19 @@ int main() {
     Eigen::VectorXd x = Eigen::VectorXd::Zero(2);
     x << -1, 2;
 
-    GradientDescent<Armijo> gradient_descent(&func, &calc_grad);
+    GradientDescent<Armijo> gradient_descent(2, &func, &calc_grad);
     gradient_descent.solve(x, 1e-6);
     gradient_descent.output_to_file(std::string(p.parent_path()) + "/result/gradient_descent.txt");
     
-    ConjugateGradient<Armijo> conjugate_gradient(&func, &calc_grad);
+    ConjugateGradient<Armijo> conjugate_gradient(2, &func, &calc_grad);
     conjugate_gradient.solve(x, 1e-6);
     conjugate_gradient.output_to_file(std::string(p.parent_path()) + "/result/conjugate_gradient.txt");
 
-    NewtonsMethod<Armijo> newtons_method(&func, &calc_grad, &calc_hessian);
+    NewtonMethod<Armijo> newtons_method(2, &func, &calc_grad, &calc_hessian);
     newtons_method.solve(x, 1e-6);
     newtons_method.output_to_file(std::string(p.parent_path()) + "/result/newtons_method.txt");
 
-    BFGS<Armijo> BFGS(&func, &calc_grad);
+    BFGS<Armijo> BFGS(2, &func, &calc_grad);
     BFGS.solve(x, 1e-6);
     BFGS.output_to_file(std::string(p.parent_path()) + "/result/BFGS.txt");
 }

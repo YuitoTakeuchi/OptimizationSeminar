@@ -1,7 +1,7 @@
 // #include "SearchDirection.hpp"
 // #include "LineSearch.hpp"
 
-#include "NewtonMethod.hpp"
+#include "NonlinearEquationSolver.hpp"
 #include <filesystem>
 
 // ラグランジュの未定乗数法で解く
@@ -44,7 +44,7 @@ int main() {
     // bfgs_solver.output_to_file(std::string(p.parent_path()) + "/result/BFGS.txt");
 
     // Newton法でgrad = 0を解く
-    NewtonMethod solver(3, &grad, &hessian);
+    NLEqSolver::NewtonMethod solver(3, &grad, &hessian);
     Eigen::VectorXd x = Eigen::VectorXd::Ones(3);
     solver.solve(x, 1e-6, 100);
 

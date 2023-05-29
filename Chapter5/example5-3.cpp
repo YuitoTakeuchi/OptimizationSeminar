@@ -1,7 +1,7 @@
 // #include "SearchDirection.hpp"
 // #include "LineSearch.hpp"
 
-#include "NewtonMethod.hpp"
+#include "NonlinearEquationSolver.hpp"
 #include <filesystem>
 
 constexpr double beta = 1.0;
@@ -43,7 +43,7 @@ int main() {
 
 
     // Newton法でgrad = 0を解く
-    NewtonMethod solver(3, &grad, &hessian);
+    NLEqSolver::NewtonMethod solver(3, &grad, &hessian);
     Eigen::VectorXd x = Eigen::VectorXd::Ones(3);
     solver.solve(x, 1e-6, 100);
 }

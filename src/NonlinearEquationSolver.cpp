@@ -1,11 +1,11 @@
-#include "NewtonMethod.hpp"
+#include "NonlinearEquationSolver.hpp"
 
-NewtonMethod::NewtonMethod(int N, Eigen::VectorXd (*target_func)(const Eigen::VectorXd&), Eigen::MatrixXd (*jacob)(const Eigen::VectorXd&))
+NLEqSolver::NewtonMethod::NewtonMethod(int N, Eigen::VectorXd (*target_func)(const Eigen::VectorXd&), Eigen::MatrixXd (*jacob)(const Eigen::VectorXd&))
 : N(N), target_func(target_func), get_jacobian(jacob) {
 
 }
 
-Eigen::VectorXd NewtonMethod::solve(Eigen::VectorXd initial_point, double tolerance, int max_iteration) {
+Eigen::VectorXd NLEqSolver::NewtonMethod::solve(Eigen::VectorXd initial_point, double tolerance, int max_iteration) {
     Eigen::VectorXd estimation = initial_point;
     Eigen::VectorXd current = Eigen::VectorXd::Ones(N);
     int cnt = 0;

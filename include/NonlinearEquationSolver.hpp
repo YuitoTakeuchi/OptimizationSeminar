@@ -4,6 +4,8 @@
 
 #include <Eigen/Dense>
 
+namespace NLEqSolver {
+
 // solve non-linear equation by Newton's method.
 // use analytic derivative if provided
 // template parameter N is the dimension of input variable
@@ -18,3 +20,5 @@ private:
     Eigen::VectorXd (*target_func)(const Eigen::VectorXd&);
     Eigen::MatrixXd (*get_jacobian)(const Eigen::VectorXd&);
 };
+
+} // end of namespace
