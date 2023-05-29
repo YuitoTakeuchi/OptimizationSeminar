@@ -117,7 +117,7 @@ public:
             alpha *= grad_norm;
             ++cnt;
         }
-        if(cnt == max_iter) cnt = -1;
+        if(cnt >= max_iter) cnt = -1;
         optimal_point = x;
         optimal_function_value = objective_func(x);
         output_result();
@@ -172,7 +172,7 @@ public:
             x += ls.find_step() * search_direction;
             ++cnt;
         }
-        if(cnt == max_iter) cnt = -1;
+        if(cnt >= max_iter) cnt = -1;
         optimal_point = x;
         optimal_function_value = objective_func(x);
         output_result();
@@ -209,7 +209,7 @@ public:
             x += ls.find_step() * search_direction;
             ++cnt;
         }
-        if(cnt == max_iter) cnt = -1;
+        if(cnt >= max_iter) cnt = -1;
         optimal_point = x;
         optimal_function_value = objective_func(x);
         output_result();
@@ -222,8 +222,8 @@ private:
     Eigen::MatrixXd H;
 
 public:
-    BFGS(double (*objective_func)(const Eigen::VectorXd&), Eigen::VectorXd (*gradient_func)(const Eigen::VectorXd&))
-    : SearchDirection(objective_func, gradient_func) {
+    BFGS(double (*objective_func)(const Eigen::VectorXd&), Eigen::VectorXd (*gradient_func)(const Eigen::VectorXd&), int max_iter=1000000)
+    : SearchDirection(objective_func, gradient_func, max_iter) {
         optimizer = "BFGS";
     }
 
@@ -241,7 +241,7 @@ public:
             y = grad;
             grad = gradient_func(x);
             y = grad - y;
-            if(grad.maxCoeff() < tolerance && -grad.minCoeff() < tolerance) break; // converged.
+            if((grad.maxCoeff() < tolerance && -grad.minCoeff() < tolerance) || cnt>max_iter) break; // converged.
             if(cnt == 0 || reset) {
                 H = Eigen::MatrixXd::Identity(N, N) * grad.norm();
             } else {
@@ -255,6 +255,7 @@ public:
             x += s;
             ++cnt;
         }
+        if(cnt >= max_iter) cnt = -1;
         optimal_point = x;
         optimal_function_value = objective_func(x);
         output_result();

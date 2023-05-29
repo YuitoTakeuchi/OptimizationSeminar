@@ -28,7 +28,7 @@ class Armijo: public LineSearch {
 public:
     Armijo(double (*objective_func)(const Eigen::VectorXd&), Eigen::VectorXd (*gradient_func)(const Eigen::VectorXd&),
         double current, double grad, Eigen::VectorXd x_start, Eigen::VectorXd direction, double alpha_init=1.0);
-    double find_step(double mu=1e-4, double rho=0.5);
+    double find_step(double mu=1e-4, double rho=0.5, double alpha_min=1e-9);
 };
 
 // wolf条件を満たすようにステップ幅を求める

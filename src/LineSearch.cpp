@@ -11,10 +11,14 @@ Armijo::Armijo(double (*objective_func)(const Eigen::VectorXd&), Eigen::VectorXd
 
 }
 
-double Armijo::find_step(double mu, double rho) {
+double Armijo::find_step(double mu, double rho, double alpha_min) {
     double alpha = alpha_init;
     while(objective_func(x_start + alpha * direction) > objective_func(x_start) + mu * alpha * g_phi0) {
         alpha = rho * alpha;
+        if(alpha < alpha_min) {
+            alpha = alpha_min;
+            break;
+        }
     }
     return alpha;
 };
