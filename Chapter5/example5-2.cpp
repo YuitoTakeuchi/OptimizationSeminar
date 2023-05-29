@@ -35,18 +35,8 @@ Eigen::MatrixXd hessian(const Eigen::VectorXd& x) {
 }
 
 int main() {
-    // これだと発散してうまく行かない
-    // BFGS<Armijo> bfgs_solver(&lagrangian, &grad);
-    // Eigen::VectorXd x = Eigen::VectorXd::Zero(3); x << -sqrt(2), sqrt(2)/2.0, sqrt(2)+0.01;
-    // bfgs_solver.solve(x, 1e-6);
-
-    // std::filesystem::path p = __FILE__;
-    // bfgs_solver.output_to_file(std::string(p.parent_path()) + "/result/BFGS.txt");
-
     // Newton法でgrad = 0を解く
     NLEqSolver::NewtonMethod solver(3, &grad, &hessian);
     Eigen::VectorXd x = Eigen::VectorXd::Ones(3);
     solver.solve(x, 1e-6, 100);
-
-
 }
