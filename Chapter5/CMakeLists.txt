@@ -15,6 +15,7 @@ target_include_directories(${PART_NAME} PRIVATE
 target_link_libraries(${PART_NAME} PRIVATE
 # lib
     LineSearch
+    NewtonMethod
 
 # external library
     Eigen3::Eigen
@@ -38,6 +39,7 @@ target_include_directories(${PART_NAME} PRIVATE
 target_link_libraries(${PART_NAME} PRIVATE
 # lib
     LineSearch
+    NewtonMethod
 
 # external library
     Eigen3::Eigen
