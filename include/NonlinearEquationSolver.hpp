@@ -21,4 +21,9 @@ private:
     Eigen::MatrixXd (*get_jacobian)(const Eigen::VectorXd&);
 };
 
+class BFGS {
+public:
+    BFGS(int N, Eigen::VectorXd (*target_func)(const Eigen::VectorXd&));
+};
+
 } // end of namespace
