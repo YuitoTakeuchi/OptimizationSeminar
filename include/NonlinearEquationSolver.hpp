@@ -13,7 +13,7 @@ namespace NLEqSolver {
 class NewtonMethod {
 public:
     NewtonMethod(int N, Eigen::VectorXd (*target_func)(const Eigen::VectorXd&), Eigen::MatrixXd (*jacob)(const Eigen::VectorXd&));
-    Eigen::VectorXd solve(Eigen::VectorXd initial_point, double tolerance = 1e-9, int max_iteration = -1);
+    Eigen::VectorXd solve(Eigen::VectorXd initial_point, double tolerance = 1e-9, int max_iteration = 1000000);
 
 private:
     const int N;
@@ -24,6 +24,12 @@ private:
 class BFGS {
 public:
     BFGS(int N, Eigen::VectorXd (*target_func)(const Eigen::VectorXd&));
+    Eigen::VectorXd solve(Eigen::VectorXd initial_point, double tolerance = 1e-9, int max_iteration = 1000000);
+
+private:
+    const int N;
+    Eigen::VectorXd (*target_func)(const Eigen::VectorXd&);
+    Eigen::MatrixXd H; // approximation of hessian
 };
 
 } // end of namespace

@@ -36,7 +36,8 @@ Eigen::MatrixXd hessian(const Eigen::VectorXd& x) {
 
 int main() {
     // Newton法でgrad = 0を解く
-    NLEqSolver::NewtonMethod solver(3, &grad, &hessian);
+    NLEqSolver::BFGS solver(3, &grad);
+    // NLEqSolver::NewtonMethod solver(3, &grad, &hessian);
     Eigen::VectorXd x = Eigen::VectorXd::Ones(3);
     solver.solve(x, 1e-6, 100);
 }
