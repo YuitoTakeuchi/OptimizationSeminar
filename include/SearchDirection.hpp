@@ -259,7 +259,7 @@ public:
             y = grad - y;
             if((grad.maxCoeff() < tolerance && -grad.minCoeff() < tolerance) || cnt>max_iter) break; // converged.
             if(cnt == 0 || reset) {
-                H = Eigen::MatrixXd::Identity(Nx, Nx) * grad.norm();
+                H = Eigen::MatrixXd::Identity(Nx, Nx) / grad.norm();
             } else {
                 double sigma = 1.0 / s.dot(y);
                 H = (Eigen::MatrixXd::Identity(Nx, Nx) - sigma * s * y.transpose()) * H * (Eigen::MatrixXd::Identity(Nx, Nx) - sigma * y * s.transpose()) + sigma * s * s.transpose();
