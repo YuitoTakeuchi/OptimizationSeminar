@@ -1,7 +1,7 @@
 #include <iostream>
 
 #include <Eigen/Dense>
-#include "NewtonMethod.hpp"
+#include "NonlinearEquationSolver.hpp"
 
 // example 3.7
 Eigen::VectorXd example3_7(const Eigen::VectorXd& p) {
@@ -35,13 +35,13 @@ Eigen::MatrixXd example3_8_jacob(const Eigen::VectorXd& p) {
 
 // example 
 int main() {
-    NewtonMethod nm1(1, example3_7, example3_7_jacob);
+    NLEqSolver::NewtonMethod nm1(1, example3_7, example3_7_jacob);
     Eigen::VectorXd sol = nm1.solve(1.5*Eigen::VectorXd::Ones(1));
     std::cout << sol << std::endl;
     sol = nm1.solve(-0.5*Eigen::VectorXd::Ones(1));
     std::cout << sol << std::endl;
 
-    NewtonMethod nm2(2, example3_8, example3_8_jacob);
+    NLEqSolver::NewtonMethod nm2(2, example3_8, example3_8_jacob);
     Eigen::VectorXd initial_point = Eigen::VectorXd::Zero(2);
     initial_point << 2.0, 3.0;
     sol = nm2.solve(initial_point);

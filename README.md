@@ -32,7 +32,7 @@ CMake suite maintained and supported by Kitware (kitware.com/cmake).
 #include "SearchDirection.hpp"
 ```
 
-1. 目的関数，勾配関数，ニュートン法の場合はヘッシアン関数を記述する．
+2. 目的関数，勾配関数，ニュートン法の場合はヘッシアン関数を記述する．
 ```cpp
 double func(const Eigen::VectorXd& point) {
     double ret = 0.0;
@@ -63,7 +63,7 @@ Eigen::MatrixXd calc_hessian(const Eigen::VectorXd& x) {
 
 3. LineSearchのアルゴリズムを指定し，最適化問題を解くインスタンスを作成する．メソッドを呼んで解く．
 ```cpp
-    ConjugateGradient<Armijo> cg(&func, &calc_grad); // 直線探索にはArmijo条件を使用する．
+    ConjugateGradient<Armijo> cg(2, &func, &calc_grad); // 直線探索にはArmijo条件を使用する．
     Eigen::VectorXd x = Eigen::VectorXd::Zero(2);
     x << -1, 1; // 初期点
     cg.solve(x, 1e-6); // 初期点をx，toleranceを1e-6として問題を解く．

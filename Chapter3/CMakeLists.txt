@@ -14,7 +14,7 @@ target_include_directories(${PART_NAME} PRIVATE
 # ライブラリにリンク
 target_link_libraries(${PART_NAME} PRIVATE
 # lib
-    NewtonMethod
+    NonlinearEquationSolver
 
 # external library
     Eigen3::Eigen
