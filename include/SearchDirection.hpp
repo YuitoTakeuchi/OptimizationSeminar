@@ -10,10 +10,6 @@ class SearchDirection {
 public:
     void set_store_points(bool target) {
         store_points = target;
-        if(target) {
-            point_history.reserve(max_iter);
-            obj_history.reserve(max_iter);
-        }
     }
 
     void output_to_file(std::ofstream& ofs) {
@@ -55,15 +51,14 @@ protected:
     Eigen::VectorXd optimal_point;
     double optimal_function_value;
     
-    const int max_iter;
     const int Nx;
     int cnt;
     std::vector<Eigen::VectorXd> point_history;
     std::vector<double> obj_history;
     bool store_points;
 
-    SearchDirection(int Nx, double (*objective_func)(const Eigen::VectorXd&), Eigen::VectorXd (*gradient_func)(const Eigen::VectorXd&), int max_iter = 1000000)
-    :Nx(Nx), objective_func(objective_func), gradient_func(gradient_func), max_iter(max_iter)  {
+    SearchDirection(int Nx, double (*objective_func)(const Eigen::VectorXd&), Eigen::VectorXd (*gradient_func)(const Eigen::VectorXd&))
+    :Nx(Nx), objective_func(objective_func), gradient_func(gradient_func)  {
         store_points = true;
         cnt = 0;
     }
@@ -93,11 +88,17 @@ class GradientDescent: public SearchDirection {
 private:
 
 public:
-    GradientDescent(int Nx, double (*objective_func)(const Eigen::VectorXd&), Eigen::VectorXd (*gradient_func)(const Eigen::VectorXd&), int max_iter = 1000000)
-    : SearchDirection(Nx, objective_func, gradient_func, max_iter) {
+    GradientDescent(int Nx, double (*objective_func)(const Eigen::VectorXd&), Eigen::VectorXd (*gradient_func)(const Eigen::VectorXd&))
+    : SearchDirection(Nx, objective_func, gradient_func) {
         optimizer = "Gradient Descent";
     }
-    void solve(Eigen::VectorXd x, double tolerance=1e-9) {
+    void solve(Eigen::VectorXd x, double tolerance=1e-9, int max_iter=1000000) {
+        if(store_points) {
+            if(point_history.size() > 0) point_history.clear();
+            if(obj_history.size() > 0) obj_history.clear();
+            point_history.reserve(max_iter);
+            obj_history.reserve(max_iter);
+        }
         Eigen::VectorXd grad = gradient_func(x);
         double alpha = 1.0;
         while(grad.maxCoeff() > tolerance || -grad.minCoeff() > tolerance && cnt < max_iter) {
@@ -129,15 +130,20 @@ class ConjugateGradient: public SearchDirection {
 private:
 
 public:
-    ConjugateGradient(int Nx, double (*objective_func)(const Eigen::VectorXd&), Eigen::VectorXd (*gradient_func)(const Eigen::VectorXd&), int max_iter = 1000000)
-    : SearchDirection(Nx, objective_func, gradient_func, max_iter) {
+    ConjugateGradient(int Nx, double (*objective_func)(const Eigen::VectorXd&), Eigen::VectorXd (*gradient_func)(const Eigen::VectorXd&))
+    : SearchDirection(Nx, objective_func, gradient_func) {
         optimizer = "Conjugate Gradient";
     }
-    void solve(Eigen::VectorXd x, double tolerance=1e-9) {
-        const int N = x.rows();
+    void solve(Eigen::VectorXd x, double tolerance=1e-9, int max_iter=1000000) {
+        if(store_points) {
+            if(point_history.size() > 0) point_history.clear();
+            if(obj_history.size() > 0) obj_history.clear();
+            point_history.reserve(max_iter);
+            obj_history.reserve(max_iter);
+        }
         Eigen::VectorXd grad, search_direction;
-        search_direction = Eigen::VectorXd::Zero(N);
-        grad = Eigen::VectorXd::Ones(N);
+        search_direction = Eigen::VectorXd::Zero(Nx);
+        grad = Eigen::VectorXd::Ones(Nx);
         bool reset = false;
 
         double grad_squared_norm = 1.0, prev_grad_squared_norm = 1.0;
@@ -184,15 +190,20 @@ class NewtonMethod: public SearchDirection {
 private:
     Eigen::MatrixXd (*hessian_func)(const Eigen::VectorXd&);
 public:
-    NewtonMethod(int Nx, double (*objective_func)(const Eigen::VectorXd&), Eigen::VectorXd (*gradient_func)(const Eigen::VectorXd&), Eigen::MatrixXd (*hessian_func)(const Eigen::VectorXd&), int max_iter = 1000000)
-    : SearchDirection(Nx, objective_func, gradient_func, max_iter), hessian_func(hessian_func) {
+    NewtonMethod(int Nx, double (*objective_func)(const Eigen::VectorXd&), Eigen::VectorXd (*gradient_func)(const Eigen::VectorXd&), Eigen::MatrixXd (*hessian_func)(const Eigen::VectorXd&))
+    : SearchDirection(Nx, objective_func, gradient_func), hessian_func(hessian_func) {
         optimizer = "Newton's Method";
 
     }
-    void solve(Eigen::VectorXd x, double tolerance=1e-9) {
-        const int N = x.rows();
-        Eigen::VectorXd grad = Eigen::VectorXd::Ones(N);
-        Eigen::MatrixXd hessian = Eigen::MatrixXd::Zero(N, N);
+    void solve(Eigen::VectorXd x, double tolerance=1e-9, int max_iter=1000000) {
+        if(store_points) {
+            if(point_history.size() > 0) point_history.clear();
+            if(obj_history.size() > 0) obj_history.clear();
+            point_history.reserve(max_iter);
+            obj_history.reserve(max_iter);
+        }
+        Eigen::VectorXd grad = Eigen::VectorXd::Ones(Nx);
+        Eigen::MatrixXd hessian = Eigen::MatrixXd::Zero(Nx, Nx);
         double alpha = 1.0;
         while(grad.maxCoeff() > tolerance || -grad.minCoeff() > tolerance && cnt < max_iter) {
             double obj_val = objective_func(x);
@@ -222,16 +233,21 @@ private:
     Eigen::MatrixXd H;
 
 public:
-    BFGS(int Nx, double (*objective_func)(const Eigen::VectorXd&), Eigen::VectorXd (*gradient_func)(const Eigen::VectorXd&), int max_iter=1000000)
-    : SearchDirection(Nx, objective_func, gradient_func, max_iter) {
+    BFGS(int Nx, double (*objective_func)(const Eigen::VectorXd&), Eigen::VectorXd (*gradient_func)(const Eigen::VectorXd&))
+    : SearchDirection(Nx, objective_func, gradient_func) {
         optimizer = "BFGS";
     }
 
-    void solve(Eigen::VectorXd x, double tolerance=1e-9) {
-        const int N = x.rows();
+    void solve(Eigen::VectorXd x, double tolerance=1e-9, int max_iter=1000000) {
+        if(store_points) {
+            if(point_history.size() > 0) point_history.clear();
+            if(obj_history.size() > 0) obj_history.clear();
+            point_history.reserve(max_iter);
+            obj_history.reserve(max_iter);
+        }
         bool reset = false;
         Eigen::VectorXd s, y;
-        Eigen::VectorXd grad = Eigen::VectorXd::Zero(N);
+        Eigen::VectorXd grad = Eigen::VectorXd::Zero(Nx);
         while(1) {
             double obj_val = objective_func(x);
             if(store_points) {
@@ -243,10 +259,10 @@ public:
             y = grad - y;
             if((grad.maxCoeff() < tolerance && -grad.minCoeff() < tolerance) || cnt>max_iter) break; // converged.
             if(cnt == 0 || reset) {
-                H = Eigen::MatrixXd::Identity(N, N) * grad.norm();
+                H = Eigen::MatrixXd::Identity(Nx, Nx) * grad.norm();
             } else {
                 double sigma = 1.0 / s.dot(y);
-                H = (Eigen::MatrixXd::Identity(N, N) - sigma * s * y.transpose()) * H * (Eigen::MatrixXd::Identity(N, N) - sigma * y * s.transpose()) + sigma * s * s.transpose();
+                H = (Eigen::MatrixXd::Identity(Nx, Nx) - sigma * s * y.transpose()) * H * (Eigen::MatrixXd::Identity(Nx, Nx) - sigma * y * s.transpose()) + sigma * s * s.transpose();
             }
             Eigen::VectorXd search_direction = -H * grad;
             double grad_phi0 = grad.dot(search_direction);
